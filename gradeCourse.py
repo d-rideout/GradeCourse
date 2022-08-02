@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 'Grade course from gradescope download to prepare submission'
 
+
+
 from sys import argv
-from myAssignments import acol
+from myAssignments import ass
 
 # Parse command line
 if len(argv)<2:
@@ -27,21 +29,13 @@ for fi, fn in enumerate(argv[1:]):
       db[k] = {}
       db[k]['ln']   = ll[0]
       db[k]['fn']   = ll[1]
-      for ak, ac in acol[fi].items():
+      #       for ak, ac in acol[fi].items():
+      ac = 4
+      for ak in ass[fi]:
         v = ll[ac]
         if v: db[k][ak] = float(v)
         else: db[k][ak] = None # ?
-#       db[k]['hw1']  = float(ll[4])
-#       db[k]['hw2']  = float(ll[8])
-#       db[k]['mt1a'] = float(ll[12])
-#       db[k]['mt1b'] = float(ll[16])
-#       db[k]['hw3']  = float(ll[20])
-#       db[k]['hw4']  = float(ll[24])
-#       db[k]['mt2a'] = float(ll[28])
-#       db[k]['mt2b'] = float(ll[32])
-#       db[k]['hw5']  = float(ll[36])
-#       db[k]['fea']  = float(ll[40])
-#       db[k]['feb']  = float(ll[44])
+        ac += 4
 
       # store maxes
       if ng[fi]==1:
