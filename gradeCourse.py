@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 'Grade course from gradescope download to prepare submission'
 
-
-
 from sys import argv
 from myAssignments import ass
+# Be sure assignment keys are unique across entire course
 
 # Parse command line
 if len(argv)<2:
@@ -14,17 +13,16 @@ if len(argv)<2:
 
 db = {} # key SID val dict key: ln fn + those defined in myAssignments
 max = {} # keys from myAssignments
-ng = [0] # num grades per spreadsheet
+ng = [] # num grades per spreadsheet
 
 # Read gradescope grades for main course
 for fi, fn in enumerate(argv[1:]):
+  ng += [0]
   fp = open(fn)
   for ls in fp.readlines():
-    print(ls)
-    ll = ls.split(',')
-  #   print(ll)
-
+    print(ls, end='')
     if ng[fi]:
+      ll = ls.split(',')
       k = ll[2]
       db[k] = {}
       db[k]['ln']   = ll[0]
@@ -39,18 +37,13 @@ for fi, fn in enumerate(argv[1:]):
 
       # store maxes
       if ng[fi]==1:
-        max['hw1'] = float(ll[5])
-        max['hw2'] = float(ll[9])
-        max['mt1a'] = float(ll[13])
-        max['mt1b'] = float(ll[17])
-        max['hw3'] = float(ll[21])
-        max['hw4'] = float(ll[25])
-        max['mt2a'] = float(ll[29])
-        max['mt2b'] = float(ll[33])
-        max['hw5'] = float(ll[37])
-        max['fea'] = float(ll[41])
-        max['feb'] = float(ll[45])
-  #     else:
-  #       if (max['hw1'],max['hw2'],max['mt1a'],) != (): die
+        ac = 5
+        for ak in ass[fi]:
+          max[ak] = float(ll[ac])
+          ac += 4
+  #   else:
+  #     if (max['hw1'],max['hw2'],max['mt1a'],) != (): die
 
     ng[fi] += 1
+
+print('num grades (plus 1):', ng)
