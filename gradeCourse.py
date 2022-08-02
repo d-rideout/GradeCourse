@@ -20,7 +20,7 @@ for fi, fn in enumerate(argv[1:]):
   ng += [0]
   fp = open(fn)
   for ls in fp.readlines():
-    print(ls, end='')
+#     print(ls, end='')
     if ng[fi]:
       ll = ls.split(',')
       k = ll[2]
@@ -41,8 +41,13 @@ for fi, fn in enumerate(argv[1:]):
         for ak in ass[fi]:
           max[ak] = float(ll[ac])
           ac += 4
-  #   else:
-  #     if (max['hw1'],max['hw2'],max['mt1a'],) != (): die
+      else: # check that maxes are constant
+        ac = 5
+        for ak in ass[fi]:
+          if max[ak] != float(ll[ac]):
+            print('max mismatch!')
+            exit()
+          ac += 4
 
     ng[fi] += 1
 
