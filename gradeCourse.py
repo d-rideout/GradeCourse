@@ -34,6 +34,8 @@ def ckd(vs):
   if nd>md:
     print(f'{nd}>{md}:', vs)
     md = nd
+    return True
+  return False
 
 
 # Parse command line
@@ -69,7 +71,7 @@ for fi, fn in enumerate(argv[1:]):
       if debug: print(ll)
       if nskip[fi]==1: k = ll[2] # student id
       else: k = ll[3] # student id HACK
-      print(f'key=[{k}]')
+      if debug: print(f'key=[{k}]')
       if not k: continue # skip Student, Test with no SID
       if not k in db: db[k] = {}
       if nskip[fi]==1: # HACK! actually this should not be needed
@@ -82,9 +84,9 @@ for fi, fn in enumerate(argv[1:]):
         if ak in spcol: ac = spcol[ak] # special columns
         v = ll[ac]
         if v:
-          print(f'ak=[{ak}] ac=[{ac}] v=[{v}]')
+          if debug: print(f'ak=[{ak}] ac=[{ac}] v=[{v}]')
           db[k][ak] = dm.Decimal(v)
-          ckd(v)
+          if ckd(v): print('from', k)
         else: db[k][ak] = None # ?
         ac += 4
 
@@ -107,5 +109,5 @@ for fi, fn in enumerate(argv[1:]):
 
 print('num grades (plus 1):', ng)
 
-for a in ass[0]+ass[1]:
+for a in ass[0]+ass[1]+ass[2]:
   ega(a)
