@@ -15,10 +15,14 @@ def grade(s, a):
     g = db[s][a]
     if g: return g
     else: return 0
-  else: print('no', a, 'grade for', s)
+  else:
+    print('no', a, 'grade for', s)
+    return 0
 
 def sg(s):
   "compute a student's numerical grade"
+
+  print(s, end=' ')
 
   # HW 1
   g = grade(s, 'hw1')
@@ -34,14 +38,29 @@ def sg(s):
     if g: hw25.append(g/max[hwa])
     else: hw25.append(0)
 #     print(g, max[hwa], end='  ')
-  print(hw1, hw25, min(hw25))
+  print('HW:', hw1, hw25, min(hw25))
 
   # MT1
-  mt = [grade(s, 'mt1a'), grade(s, 'mt1b')]
+  mt = [grade(s, 'mt1a')/max['mt1a'], grade(s, 'mt1b')/max['mt1b']]
 #   if grade(s, 'mt1a')!=None and grade(s, 'mt1b')!=None:
 #     print('um')
 #     exit()
   print('midterm:', mt)
+
+  # Final
+  fe = [grade(s, 'fea')/max['fea'], grade(s, 'feb')/max['feb']]
+  print('final:', fe)
+
+  # MATLAB HW
+  mlt = ('ml1', 'ml2', 'ml3', 'ml4', 'ml5')
+  mlhw = []
+  for mla in mlt:
+    mlhw.append(grade(s, mla)/max[mla])
+  print('MATLAB HW:', mlhw)
+
+  # MATLAB Quiz
+  mlq = grade(s, 'mlfq')/max['mlfq']
+  print('MATLAB Q:', mlq, end='\n\n')
 
 def ega(ak):
   'explore grade for assignment ak'
@@ -145,7 +164,7 @@ for fi, fn in enumerate(argv[1:]):
 
     ng[fi] += 1
 
-print('num grades (plus 1):', ng)
+print('num grades (plus 1):', ng, '\n')
 
 assignments = ass[0]+ass[1]+ass[2]
 # for a in ass[0]+ass[1]+ass[2]:
@@ -156,5 +175,5 @@ assignments = ass[0]+ass[1]+ass[2]
 # epair('fea', 'feb')
 # no one took both exams
 
-print(assignments)
+# print(assignments)
 for s in db: sg(s)
