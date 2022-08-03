@@ -16,12 +16,20 @@ def grade(s, a):
 
 def sg(s):
   "compute a student's numerical grade"
-  hw1 = grade(s, 'hw1') # db[s]['hw1']
-  print(s, hw1)
 
+  # HW 1
+  hw1 = grade(s, 'hw1') # max['hw1']
+
+  # HW 2-5
   hwt = ('hw2', 'hw3', 'hw4', 'hw5')
+#   hw25 = []
+  print(s, hw1, max['hw1'], end=' | ')
   for hwa in hwt:
-    print(s, grade(s, hwa))
+    print(grade(s, hwa), max[hwa], end='  ')
+  print()
+
+  # MT1
+
 
 def ega(ak):
   'explore grade for assignment ak'
