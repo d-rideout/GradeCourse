@@ -22,45 +22,61 @@ def grade(s, a):
 def sg(s):
   "compute a student's numerical grade"
 
-  print(s, end=' ')
+  print('\n', s, end=' ')
 
   # HW 1
   g = grade(s, 'hw1')
-  if g: hw1 = g/max['hw1']
+  if g: hw1 = dm.Decimal(g/mga['hw1'])
   else: hw1 = 0
-#   print(s, hw1, max['hw1'], end=' | ')
+#   print(s, hw1, mga['hw1'], end=' | ')
   
   # HW 2-5
   hwt = ('hw2', 'hw3', 'hw4', 'hw5')
   hw25 = []
   for hwa in hwt:
     g = grade(s, hwa)
-    if g: hw25.append(g/max[hwa])
+    if g: hw25.append(g/mga[hwa])
     else: hw25.append(0)
-#     print(g, max[hwa], end='  ')
-  print('HW:', hw1, hw25, min(hw25))
+#     print(g, mga[hwa], end='  ')
+  hw25g = dm.Decimal((sum(hw25)-min(hw25))/3)
+  print(f'HW: f25={hw25g} hw1={hw1} {hw25}') # min(hw25))
 
   # MT1
-  mt = [grade(s, 'mt1a')/max['mt1a'], grade(s, 'mt1b')/max['mt1b']]
+  mt = [grade(s, 'mt1a')/mga['mt1a'], grade(s, 'mt1b')/mga['mt1b']]
 #   if grade(s, 'mt1a')!=None and grade(s, 'mt1b')!=None:
 #     print('um')
 #     exit()
-  print('midterm:', mt)
+  mtg = max(mt)
+  print('midterm:', max(mt))
 
   # Final
-  fe = [grade(s, 'fea')/max['fea'], grade(s, 'feb')/max['feb']]
-  print('final:', fe)
+  fe = [grade(s, 'fea')/mga['fea'], grade(s, 'feb')/mga['feb']]
+  feg = max(fe)
+  print('final:', max(fe))
 
   # MATLAB HW
   mlt = ('ml1', 'ml2', 'ml3', 'ml4', 'ml5')
   mlhw = []
   for mla in mlt:
-    mlhw.append(grade(s, mla)/max[mla])
-  print('MATLAB HW:', mlhw)
+    mlhw.append(grade(s, mla)/mga[mla])
+  mlhwg = sum(sorted(mlhw)[2:])/3
+  print('MATLAB HW:', mlhwg, sorted(mlhw)[2:]) # , sorted(mlhw))
 
   # MATLAB Quiz
-  mlq = grade(s, 'mlfq')/max['mlfq']
-  print('MATLAB Q:', mlq, end='\n\n')
+  mlq = dm.Decimal(grade(s, 'mlfq')/mga['mlfq'])
+  print('MATLAB Q:', mlq)
+
+  print('hw:', dm.Decimal(.3)*(hw1 + 3*hw25g)/4, dm.Decimal(.3)*hw25g)
+  hwg = max(dm.Decimal(.3)*(hw1 + 3*hw25g)/4, dm.Decimal(.3)*hw25g)
+  
+#   ghw1 = dm.Decimal(.3)*(hw1 + 3*hw25g)/4
+#   + dm.Decimal(.3)*mtg
+#   + dm.Decimal(.3)*feg
+#   + dm.Decimal(.06)*mlhwg
+#   + dm.Decimal(.04)*dm.Decimal(mlq)
+#   g = dm.Decimal(.3)*hw25g + dm.Decimal(.3)*mtg + dm.Decimal(.3)*feg + dm.Decimal(.06)*mlhwg + dm.Decimal(.04)*mlq
+  g = hwg + dm.Decimal(.3)*mtg + dm.Decimal(.3)*feg + dm.Decimal(.06)*mlhwg + dm.Decimal(.04)*mlq
+  print('final grade=', g)
 
 def ega(ak):
   'explore grade for assignment ak'
@@ -77,7 +93,7 @@ def ega(ak):
   del h[None]
   for v,n in sorted(h.items()):
     print(f'{v:4} {n}')
-  print('out of', max[ak])
+  print('out of', mga[ak])
 
 def ckd(vs):
   'check number of decimal places'
@@ -102,7 +118,7 @@ if len(argv)<2:
   exit()
 
 db = {} # key SID val dict key: ln fn + those defined in myAssignments
-max = amax # keys from myAssignments
+mga = amax # keys from myAssignments
 ng = [] # num grades per spreadsheet
 md = 0  # max decimal places
 
@@ -111,6 +127,7 @@ print('GradeCourse v0')
 dc = dm.getcontext()
 # print(dm.getcontext())
 # dc.traps[dm.Inexact] = True
+dc.prec = 9
 for fi, fn in enumerate(argv[1:]):
   print('parsing', fn)
   ng += [0]
@@ -152,12 +169,12 @@ for fi, fn in enumerate(argv[1:]):
         if ng[fi]==1:
           ac = 5
           for ak in ass[fi]:
-            max[ak] = dm.Decimal(ll[ac])
+            mga[ak] = dm.Decimal(ll[ac])
             ac += 4
         else: # check that maxes are constant
           ac = 5
           for ak in ass[fi]:
-            if max[ak] != dm.Decimal(ll[ac]):
+            if mga[ak] != dm.Decimal(ll[ac]):
               print('max mismatch!')
               exit()
             ac += 4
