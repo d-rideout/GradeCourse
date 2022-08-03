@@ -10,6 +10,19 @@ import decimal as dm
 from myAssignments import *
 # Be sure assignment keys are unique across entire course
 
+def grade(s, a):
+  if a in db[s]: return db[s][a]
+  else: print('no', a, 'grade for', s)
+
+def sg(s):
+  "compute a student's numerical grade"
+  hw1 = grade(s, 'hw1') # db[s]['hw1']
+  print(s, hw1)
+
+  hwt = ('hw2', 'hw3', 'hw4', 'hw5')
+  for hwa in hwt:
+    print(s, grade(s, hwa))
+
 def ega(ak):
   'explore grade for assignment ak'
   print(f'\nExploring grades for assignment {ak}:')
@@ -114,11 +127,14 @@ for fi, fn in enumerate(argv[1:]):
 
 print('num grades (plus 1):', ng)
 
+assignments = ass[0]+ass[1]+ass[2]
 # for a in ass[0]+ass[1]+ass[2]:
 #   ega(a)
 
-epair('mt1a', 'mt1b')
-epair('mt2a', 'mt2b')
-epair('fea', 'feb')
+# epair('mt1a', 'mt1b')
+# epair('mt2a', 'mt2b')
+# epair('fea', 'feb')
 # no one took both exams
 
+print(assignments)
+for s in db: sg(s)
