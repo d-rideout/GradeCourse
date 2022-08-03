@@ -7,11 +7,12 @@
 
 from sys import argv
 import decimal as dm
-from myAssignments import ass
+from myAssignments import *
 # Be sure assignment keys are unique across entire course
 
 def ega(ak):
   'explore grade for assignment ak'
+  print(f'\nExploring grades for assignment {ak}:')
   h = {}
   for s in db:
     if ak in db[s]:
@@ -34,7 +35,7 @@ def ckd(vs):
     print(f'{nd}>{md}:', vs)
     md = nd
 
-    
+
 # Parse command line
 if len(argv)<2:
   print('usage: gradeCourse.py <gradescope csv files>')
@@ -42,7 +43,7 @@ if len(argv)<2:
   exit()
 
 db = {} # key SID val dict key: ln fn + those defined in myAssignments
-max = {} # keys from myAssignments
+max = amax # keys from myAssignments
 ng = [] # num grades per spreadsheet
 md = 0  # max decimal places
 
@@ -52,43 +53,59 @@ dc = dm.getcontext()
 # print(dm.getcontext())
 dc.traps[dm.Inexact] = True
 for fi, fn in enumerate(argv[1:]):
+  print('parsing', fn)
   ng += [0]
+#   if isinstance(ass[fi], list):
+#     ng += [0]
+#     spec = False # special file requiring specific column specification
+#   else:
+#     ng += [-1] # skip maxes line for now
+#     spec = True
   fp = open(fn)
   for ls in fp.readlines():
 #     print(ls, end='')
-    if ng[fi]:
+    if ng[fi] >= nskip[fi]:
       ll = ls.split(',')
-      k = ll[2]
+      if debug: print(ll)
+      if nskip[fi]==1: k = ll[2] # student id
+      else: k = ll[3] # student id HACK
+      print(f'key=[{k}]')
+      if not k: continue # skip Student, Test with no SID
       if not k in db: db[k] = {}
-      db[k]['ln']   = ll[0]
-      db[k]['fn']   = ll[1]
+      if nskip[fi]==1: # HACK! actually this should not be needed
+        # , splits last and first names in canvas file too
+        db[k]['ln']   = ll[0]
+        db[k]['fn']   = ll[1]
       #       for ak, ac in acol[fi].items():
       ac = 4
       for ak in ass[fi]:
+        if ak in spcol: ac = spcol[ak] # special columns
         v = ll[ac]
         if v:
+          print(f'ak=[{ak}] ac=[{ac}] v=[{v}]')
           db[k][ak] = dm.Decimal(v)
           ckd(v)
         else: db[k][ak] = None # ?
         ac += 4
 
       # store maxes
-      if ng[fi]==1:
-        ac = 5
-        for ak in ass[fi]:
-          max[ak] = float(ll[ac])
-          ac += 4
-      else: # check that maxes are constant
-        ac = 5
-        for ak in ass[fi]:
-          if max[ak] != float(ll[ac]):
-            print('max mismatch!')
-            exit()
-          ac += 4
+      if nskip[fi]==1: # HACK
+        if ng[fi]==1:
+          ac = 5
+          for ak in ass[fi]:
+            max[ak] = dm.Decimal(ll[ac])
+            ac += 4
+        else: # check that maxes are constant
+          ac = 5
+          for ak in ass[fi]:
+            if max[ak] != dm.Decimal(ll[ac]):
+              print('max mismatch!')
+              exit()
+            ac += 4
 
     ng[fi] += 1
 
 print('num grades (plus 1):', ng)
 
-ega('hw1')
-# print(db)
+for a in ass[0]+ass[1]:
+  ega(a)
