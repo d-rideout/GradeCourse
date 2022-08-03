@@ -18,15 +18,20 @@ def sg(s):
   "compute a student's numerical grade"
 
   # HW 1
-  hw1 = grade(s, 'hw1') # max['hw1']
-
+  g = grade(s, 'hw1')
+  if g: hw1 = g/max['hw1']
+  else: hw1 = 0
+#   print(s, hw1, max['hw1'], end=' | ')
+  
   # HW 2-5
   hwt = ('hw2', 'hw3', 'hw4', 'hw5')
-#   hw25 = []
-  print(s, hw1, max['hw1'], end=' | ')
+  hw25 = []
   for hwa in hwt:
-    print(grade(s, hwa), max[hwa], end='  ')
-  print()
+    g = grade(s, hwa)
+    if g: hw25.append(g/max[hwa])
+    else: hw25.append(0)
+#     print(g, max[hwa], end='  ')
+  print(hw1, hw25, min(hw25))
 
   # MT1
 
@@ -53,7 +58,7 @@ def ckd(vs):
   global md
   nd = len(vs.split('.')[1]) # use decimal module method? @ Quick-start Tutorial
   if nd>md:
-    print(f'{nd}>{md}:', vs)
+    print(f'{nd}>{md}:', vs, end='  ')
     md = nd
     return True
   return False
@@ -79,7 +84,7 @@ md = 0  # max decimal places
 print('GradeCourse v0')
 dc = dm.getcontext()
 # print(dm.getcontext())
-dc.traps[dm.Inexact] = True
+# dc.traps[dm.Inexact] = True
 for fi, fn in enumerate(argv[1:]):
   print('parsing', fn)
   ng += [0]
