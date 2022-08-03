@@ -10,6 +10,19 @@ import decimal as dm
 from myAssignments import *
 # Be sure assignment keys are unique across entire course
 
+def lg(g):
+  'letter grade'
+  if g>=.97: return 'A+'
+  elif g>=.93: return 'A'
+  elif g>=.90: return 'A-'
+  elif g>=.87: return 'B+'
+  elif g>=.83: return 'B'
+  elif g>=.80: return 'B-'
+  elif g>=.77: return 'C+'
+  elif g>=.73: return 'C'
+  elif g>=.70: return 'C-'
+  else: return 'F'
+  
 def grade(s, a):
   if a in db[s]:
     g = db[s][a]
@@ -76,7 +89,7 @@ def sg(s):
 #   + dm.Decimal(.04)*dm.Decimal(mlq)
 #   g = dm.Decimal(.3)*hw25g + dm.Decimal(.3)*mtg + dm.Decimal(.3)*feg + dm.Decimal(.06)*mlhwg + dm.Decimal(.04)*mlq
   g = hwg + dm.Decimal(.3)*mtg + dm.Decimal(.3)*feg + dm.Decimal(.06)*mlhwg + dm.Decimal(.04)*mlq
-  print('final grade=', g)
+  print('final grade=', g, lg(g))
 
 def ega(ak):
   'explore grade for assignment ak'
