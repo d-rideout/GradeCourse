@@ -11,7 +11,10 @@ from myAssignments import *
 # Be sure assignment keys are unique across entire course
 
 def grade(s, a):
-  if a in db[s]: return db[s][a]
+  if a in db[s]:
+    g = db[s][a]
+    if g: return g
+    else: return 0
   else: print('no', a, 'grade for', s)
 
 def sg(s):
@@ -34,7 +37,11 @@ def sg(s):
   print(hw1, hw25, min(hw25))
 
   # MT1
-
+  mt = [grade(s, 'mt1a'), grade(s, 'mt1b')]
+#   if grade(s, 'mt1a')!=None and grade(s, 'mt1b')!=None:
+#     print('um')
+#     exit()
+  print('midterm:', mt)
 
 def ega(ak):
   'explore grade for assignment ak'
