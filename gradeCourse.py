@@ -37,6 +37,11 @@ def ckd(vs):
     return True
   return False
 
+def epair(ak1, ak2):
+  'explore pair of assignments'
+  for s in db:
+    if ak1 in db[s] and ak2 in db[s] and db[s][ak1] and db[s][ak2]: print(s, db[s][ak1], db[s][ak2])
+
 
 # Parse command line
 if len(argv)<2:
@@ -109,5 +114,11 @@ for fi, fn in enumerate(argv[1:]):
 
 print('num grades (plus 1):', ng)
 
-for a in ass[0]+ass[1]+ass[2]:
-  ega(a)
+# for a in ass[0]+ass[1]+ass[2]:
+#   ega(a)
+
+epair('mt1a', 'mt1b')
+epair('mt2a', 'mt2b')
+epair('fea', 'feb')
+# no one took both exams
+
