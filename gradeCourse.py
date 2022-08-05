@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'Grade course from gradescope download to prepare submission'
+'Grade course from gradescope+canvas download to egrades submission'
 
 # Assumptions about gradescope:
 # * All grades have a single decimal past the decimal point (why???)
@@ -10,8 +10,8 @@ import decimal as dm
 from myAssignments import *
 # Be sure assignment keys are unique across entire course
 
-def lg(g):
-  'letter grade'
+def clg(g):
+  'compute letter grade'
   if g>=.97: return 'A+'
   elif g>=.93: return 'A'
   elif g>=.90: return 'A-'
@@ -35,7 +35,8 @@ def grade(s, a):
 def sg(s):
   "compute a student's numerical grade"
 
-  print('\n', s, end=' ')
+#   print('\n', s, end=' ')
+  print(s, end=' ')
 
   # HW 1
   g = grade(s, 'hw1')
@@ -54,13 +55,16 @@ def sg(s):
   hw25g = dm.Decimal((sum(hw25)-min(hw25))/3)
   print(f'HW: f25={hw25g} hw1={hw1} {hw25}') # min(hw25))
 
-  # MT1
-  mt = [grade(s, 'mt1a')/mga['mt1a'], grade(s, 'mt1b')/mga['mt1b']]
+  # MT
+  mt1 = [grade(s, 'mt1a')/mga['mt1a'], grade(s, 'mt1b')/mga['mt1b']]
 #   if grade(s, 'mt1a')!=None and grade(s, 'mt1b')!=None:
 #     print('um')
 #     exit()
-  mtg = max(mt)
-  print('midterm:', max(mt))
+  mt2 = [grade(s, 'mt2a')/mga['mt2a'], grade(s, 'mt2b')/mga['mt2b']]
+  if mt2[1]: mt2[1] += 7/mga['mt2b']
+  # I should not have done this, as I did not even give a max threshold!!
+  mtg = max(mt1+mt2)
+  print('midterm:', mtg)
 
   # Final
   fe = [grade(s, 'fea')/mga['fea'], grade(s, 'feb')/mga['feb']]
@@ -89,7 +93,12 @@ def sg(s):
 #   + dm.Decimal(.04)*dm.Decimal(mlq)
 #   g = dm.Decimal(.3)*hw25g + dm.Decimal(.3)*mtg + dm.Decimal(.3)*feg + dm.Decimal(.06)*mlhwg + dm.Decimal(.04)*mlq
   g = hwg + dm.Decimal(.3)*mtg + dm.Decimal(.3)*feg + dm.Decimal(.06)*mlhwg + dm.Decimal(.04)*mlq
-  print('final grade=', g, lg(g))
+  lg = clg(g)
+  print('final grade=', g, clg(g), '\n')
+  db[s]['lg'] = lg
+  if lg in gradeDist: gradeDist[lg] += 1
+  else: gradeDist[lg] = 1
+  return lg
 
 def ega(ak):
   'explore grade for assignment ak'
@@ -123,19 +132,22 @@ def epair(ak1, ak2):
   for s in db:
     if ak1 in db[s] and ak2 in db[s] and db[s][ak1] and db[s][ak2]: print(s, db[s][ak1], db[s][ak2])
 
-
+# ------------------------------------------------------------------------------
 # Parse command line
 if len(argv)<2:
-  print('usage: gradeCourse.py <gradescope csv files>')
+  print('usage: gradeCourse.py <grade csv files> [-cl class list files]')
   print('Be sure that the command line order matches that in myAssignments')
   exit()
 
-db = {} # key SID val dict key: ln fn + those defined in myAssignments
+db = {} # key SID val dict key: ln fn sec lg + those defined in myAssignments
 mga = amax # keys from myAssignments
 ng = [] # num grades per spreadsheet
 md = 0  # max decimal places
+gradeDist = {}
+cll = []
+clm = False
 
-# Read gradescope grades for main course
+# Read grades for main course
 print('GradeCourse v0')
 dc = dm.getcontext()
 # print(dm.getcontext())
@@ -143,6 +155,12 @@ dc = dm.getcontext()
 dc.prec = 9
 for fi, fn in enumerate(argv[1:]):
   print('parsing', fn)
+  if fn=='-cl':
+    clm = True
+    continue
+  elif clm:
+    cll.append(fn)
+    continue
   ng += [0]
 #   if isinstance(ass[fi], list):
 #     ng += [0]
@@ -206,4 +224,36 @@ assignments = ass[0]+ass[1]+ass[2]
 # no one took both exams
 
 # print(assignments)
-for s in db: sg(s)
+# for s in db: sg(s)
+
+# Read section assignments
+if len(cll)>1:
+  print("Unsure how to handle multiple class lists at the moment")
+  exit()
+elif len(cll):
+  fp = open(cll[0])
+  # secs = {}
+  ofp = {} # key sec val fp
+  for ls in fp.readlines():
+    ll = ls.split('\t')
+    if ll[0]=='Last Name': continue
+    print(ll)
+    sid = ll[2]
+    sec = ll[4]
+    db[sid]['sec'] = sec
+  #   if not sec in secs: secs[sec] = 1
+  #   secs[sec] += 1
+
+    lg = sg(sid)
+    if sec in ofp:
+  #     print('\t',join((db[sid]['ln'])), file=ofp[sec])
+      print('\t'.join((ll[0],ll[1],ll[2],sec,lg)), file=ofp[sec])
+    else:
+      ofp[sec] = open(sec+'.tsv', 'w')
+      print('\t'.join(('Last Name', 'First Name', 'Student ID', 'SectionId', 'Final_Assigned_Egrade')), file=ofp[sec])
+      print('\t'.join((ll[0],ll[1],ll[2],sec,lg)), file=ofp[sec])
+
+print()
+# print(sorted(secs))
+
+for g in sorted(gradeDist): print(g, gradeDist[g])
