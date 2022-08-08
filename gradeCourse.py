@@ -2,13 +2,51 @@
 'Grade course from gradescope+canvas download to egrades submission'
 
 # Assumptions about gradescope:
-# * All grades have a single decimal past the decimal point (why???)
+# * All grades have a single decimal past the decimal point (why??)
 # * Assignment columns start at 4 and use 4 columns each
 
 from sys import argv
-import decimal as dm
+import csv
+import decimal as dm # deprecate?
+# import fractions as fm
+# Put all content specific to your course into a myAssignments.py module:
 from myAssignments import *
 # Be sure assignment keys are unique across entire course
+
+def asscol(x):
+  'returns sequence of assignment, col pairs'
+  if isinstance(x, dict):
+    for a,c in x.items(): yield a,c
+  elif isinstance(x, list):
+    col = 4
+    for a in x:
+      yield a, col
+      col += 4
+
+def tsg(s):
+  'trace student grade'
+  # This should not be necessary -- it is already provided by sg below.
+  print(f"{s} {db[s]['ln']} {db[s]['fn']}:")
+  print(f"HW: hw1 = {grade(s, 'hw1')}/{mxga['hw1']} =", grade(s, 'hw1')/mxga['hw1'])
+  hwt = ('hw2', 'hw3', 'hw4', 'hw5')
+  hw25 = []
+  for hwa in hwt:
+    g = grade(s, hwa)
+    if g: hw25.append(f"{g}/{mxga[hwa]}")
+    else: hw25.append(0)
+#   hw25g = dm.Decimal((sum(hw25)-min(hw25))/3)
+#   print(f'    f25={hw25g} {hw25}')
+  print(f'    hw25={hw25}')
+
+  print(f"MT1 {grade(s, 'mt1a')}/{mxga['mt1a']} {grade(s, 'mt1b')}/{mxga['mt1b']}")
+  print(f"MT2 {grade(s, 'mt2a')}/{mxga['mt2a']} {grade(s, 'mt2b')}/{mxga['mt2b']}")
+
+  print(f"FE {grade(s, 'fea')}/{mxga['fea']} {grade(s, 'feb')}/{mxga['feb']}")
+
+  print(f"MATLAB HW", end='')
+  for a in ('ml1', 'ml2', 'ml3', 'ml4', 'ml5'):
+    print(f" {grade(s, a)}/{mxga[a]}")
+
 
 def clg(g):
   'compute letter grade'
@@ -32,42 +70,44 @@ def grade(s, a):
     print('no', a, 'grade for', s)
     return 0
 
+
 def sg(s):
-  "compute a student's numerical grade"
+  "compute student (SID s)'s grade"
 
 #   print('\n', s, end=' ')
-  print(s, end=' ')
+# a 'request' may appear before in output before this is called
+  print(f"{s} {db[s]['fn']} {db[s]['ln']}:") #, end=' ')
 
   # HW 1
   g = grade(s, 'hw1')
-  if g: hw1 = dm.Decimal(g/mga['hw1'])
+  if g: hw1 = dm.Decimal(g/mxga['hw1'])
   else: hw1 = 0
-#   print(s, hw1, mga['hw1'], end=' | ')
+#   print(s, hw1, mxga['hw1'], end=' | ')
   
   # HW 2-5
   hwt = ('hw2', 'hw3', 'hw4', 'hw5')
   hw25 = []
   for hwa in hwt:
     g = grade(s, hwa)
-    if g: hw25.append(g/mga[hwa])
+    if g: hw25.append(g/mxga[hwa])
     else: hw25.append(0)
-#     print(g, mga[hwa], end='  ')
+#     print(g, mxga[hwa], end='  ')
   hw25g = dm.Decimal((sum(hw25)-min(hw25))/3)
-  print(f'HW: f25={hw25g} hw1={hw1} {hw25}') # min(hw25))
+  print(f'HW: hw1={hw1} f25={hw25g} {hw25}') # min(hw25))
 
   # MT
-  mt1 = [grade(s, 'mt1a')/mga['mt1a'], grade(s, 'mt1b')/mga['mt1b']]
+  mt1 = [grade(s, 'mt1a')/mxga['mt1a'], grade(s, 'mt1b')/mxga['mt1b']]
 #   if grade(s, 'mt1a')!=None and grade(s, 'mt1b')!=None:
 #     print('um')
 #     exit()
-  mt2 = [grade(s, 'mt2a')/mga['mt2a'], grade(s, 'mt2b')/mga['mt2b']]
-  if mt2[1]: mt2[1] += 7/mga['mt2b']
+  mt2 = [grade(s, 'mt2a')/mxga['mt2a'], grade(s, 'mt2b')/mxga['mt2b']]
+  if mt2[1]: mt2[1] += 7/mxga['mt2b']
   # I should not have done this, as I did not even give a max threshold!!
   mtg = max(mt1+mt2)
   print('midterm:', mtg)
 
   # Final
-  fe = [grade(s, 'fea')/mga['fea'], grade(s, 'feb')/mga['feb']]
+  fe = [grade(s, 'fea')/mxga['fea'], grade(s, 'feb')/mxga['feb']]
   feg = max(fe)
   print('final:', max(fe))
 
@@ -75,12 +115,12 @@ def sg(s):
   mlt = ('ml1', 'ml2', 'ml3', 'ml4', 'ml5')
   mlhw = []
   for mla in mlt:
-    mlhw.append(grade(s, mla)/mga[mla])
+    mlhw.append(grade(s, mla)/mxga[mla])
   mlhwg = sum(sorted(mlhw)[2:])/3
   print('MATLAB HW:', mlhwg, sorted(mlhw)[2:]) # , sorted(mlhw))
 
   # MATLAB Quiz
-  mlq = dm.Decimal(grade(s, 'mlfq')/mga['mlfq'])
+  mlq = dm.Decimal(grade(s, 'mlfq')/mxga['mlfq'])
   print('MATLAB Q:', mlq)
 
   print('hw:', dm.Decimal(.3)*(hw1 + 3*hw25g)/4, dm.Decimal(.3)*hw25g)
@@ -115,9 +155,9 @@ def ega(ak):
   del h[None]
   for v,n in sorted(h.items()):
     print(f'{v:4} {n}')
-  print('out of', mga[ak])
+  print('out of', mxga[ak])
 
-def ckd(vs):
+def ckdf(vs):
   'check number of decimal places'
   global md
   nd = len(vs.split('.')[1]) # use decimal module method? @ Quick-start Tutorial
@@ -140,19 +180,20 @@ if len(argv)<2:
   exit()
 
 db = {} # key SID val dict key: ln fn sec lg + those defined in myAssignments
-mga = amax # keys from myAssignments
+mxga = amax # (max grade for assignment) keys from myAssignments
 ng = [] # num grades per spreadsheet
 md = 0  # max decimal places
 gradeDist = {}
-cll = []
-clm = False
+cll = [] # class list list
+clm = False # class list mode
 
 # Read grades for main course
+# ---------------------------
 print('GradeCourse v0')
-dc = dm.getcontext()
-# print(dm.getcontext())
-# dc.traps[dm.Inexact] = True
-dc.prec = 9
+# dc = dm.getcontext()
+# # print(dm.getcontext())
+# # dc.traps[dm.Inexact] = True
+# dc.prec = 9
 for fi, fn in enumerate(argv[1:]):
   print('parsing', fn)
   if fn=='-cl':
@@ -161,7 +202,8 @@ for fi, fn in enumerate(argv[1:]):
   elif clm:
     cll.append(fn)
     continue
-  ng += [0]
+  ng += [0] # add num grades count for this spreadsheet
+
 #   if isinstance(ass[fi], list):
 #     ng += [0]
 #     spec = False # special file requiring specific column specification
@@ -169,52 +211,61 @@ for fi, fn in enumerate(argv[1:]):
 #     ng += [-1] # skip maxes line for now
 #     spec = True
   fp = open(fn)
-  for ls in fp.readlines():
-#     print(ls, end='')
-    if ng[fi] >= nskip[fi]:
-      ll = ls.split(',')
+#   for ls in fp.readlines():
+  for ll in csv.reader(fp):
+    if ng[fi] >= nskip[fi]: # skip header lines
       if debug: print(ll)
-      if nskip[fi]==1: k = ll[2] # student id
-      else: k = ll[3] # student id HACK
+
+      # Read SID & names
+#       if nskip[fi]==1: k = ll[2] # student id
+#       else: k = ll[3] # student id HACK
+      k = ll[sidc[fi]]
       if debug: print(f'key=[{k}]')
       if not k: continue # skip Student, Test with no SID
       if not k in db: db[k] = {}
-      if nskip[fi]==1: # HACK! actually this should not be needed
+#       if nskip[fi]==1: # HACK! actually this should not be needed
         # , splits last and first names in canvas file too
-        db[k]['ln']   = ll[0]
-        db[k]['fn']   = ll[1]
+      # Assume first occurrence of name for this SID is correct
+      if not 'ln' in db[k]:
+        db[k]['ln']   = ll[lnc]
+        if fnc!=None: db[k]['fn']   = ll[fnc]
       #       for ak, ac in acol[fi].items():
-      ac = 4
-      for ak in ass[fi]:
-        if ak in spcol: ac = spcol[ak] # special columns
+
+      # Read grades
+      #       ac = 4
+      #       for ak in ass[fi]:
+      #         if ak in spcol: ac = spcol[ak] # special columns
+      for ak, ac in asscol(ass[fi]):
         v = ll[ac]
         if v:
           if debug: print(f'ak=[{ak}] ac=[{ac}] v=[{v}]')
           db[k][ak] = dm.Decimal(v)
-          if ckd(v): print('from', k)
+#           db[k][ak] = fm.Fraction(v) # dm.Decimal(v)
+          if ckdf(v): print('from', k)
         else: db[k][ak] = None # ?
-        ac += 4
+#         ac += 4
 
-      # store maxes
-      if nskip[fi]==1: # HACK
-        if ng[fi]==1:
-          ac = 5
-          for ak in ass[fi]:
-            mga[ak] = dm.Decimal(ll[ac])
-            ac += 4
+        # store maxes
+        #       if nskip[fi]==1: # HACK
+        if ak in amax: continue # skip if max is specified in myAssignments.py module
+        if ng[fi]==nskip[fi]: # @ first line of data
+#           ac = 5
+#           for ak in ass[fi]:
+          mxga[ak] = dm.Decimal(ll[ac+1])
+#             ac += 4
         else: # check that maxes are constant
           ac = 5
           for ak in ass[fi]:
-            if mga[ak] != dm.Decimal(ll[ac]):
+            if mxga[ak] != dm.Decimal(ll[ac]):
               print('max mismatch!')
               exit()
             ac += 4
 
     ng[fi] += 1
 
-print('num grades (plus 1):', ng, '\n')
+print(f'num grades (plus {nskip}):', ng, '\n')
 
-assignments = ass[0]+ass[1]+ass[2]
+# assignments = ass[0]+ass[1]+ass[2]
 # for a in ass[0]+ass[1]+ass[2]:
 #   ega(a)
 
@@ -237,7 +288,7 @@ elif len(cll):
   for ls in fp.readlines():
     ll = ls.split('\t')
     if ll[0]=='Last Name': continue
-    print(ll)
+    print('request from class list file:', ll) # 'request for grade'
     sid = ll[2]
     sec = ll[4]
     db[sid]['sec'] = sec
