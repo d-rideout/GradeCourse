@@ -140,7 +140,7 @@ def sg(s):
   else: gradeDist[lg] = 1
   return lg
 
-def ega(ak):
+def exga(ak):
   'explore grade for assignment ak'
   print(f'\nExploring grades for assignment {ak}:')
   h = {}
@@ -173,6 +173,10 @@ def epair(ak1, ak2):
     if ak1 in db[s] and ak2 in db[s] and db[s][ak1] and db[s][ak2]: print(s, db[s][ak1], db[s][ak2])
 
 # ------------------------------------------------------------------------------
+print(__name__)
+if __name__!='__main__': die('loaded gradeCourse as module -- not sure how to make this work')
+#   exit()
+
 # Parse command line
 if len(argv)<2:
   print('usage: gradeCourse.py <grade csv files> [-cl class list files]')
@@ -265,17 +269,22 @@ for fi, fn in enumerate(argv[1:]):
 
 print(f'num grades (plus {nskip}):', ng, '\n')
 
-# assignments = ass[0]+ass[1]+ass[2]
-# for a in ass[0]+ass[1]+ass[2]:
-#   ega(a)
-
-# epair('mt1a', 'mt1b')
-# epair('mt2a', 'mt2b')
-# epair('fea', 'feb')
-# no one took both exams
-
-# print(assignments)
-# for s in db: sg(s)
+# Run personal code
+#   import myCode
+#   from importlib import import_module
+#   try:
+#     mc = import_module('myCode')
+#     print(mc)
+#
+#     -- hits exception and punts out!!
+#   except SystemExit: pass
+# print(dir(myCode))
+#   fp = open('myCode.py')
+#   for cmd in fp.readlines():
+#     print(f'[{cmd[:-1]}]')
+#     eval(cmd[:-1])
+try: exec(open('myCode.py').read())
+except FileNotFoundError: print('myCode.py not in current working directory\n')
 
 # Read section assignments
 if len(cll)>1:
